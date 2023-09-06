@@ -2,10 +2,11 @@ package probes
 
 import (
 	"fmt"
+	"unsafe"
+
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"unsafe"
 )
 
 func NewInfoBloxConfiguration() InfoBloxConfiguration {

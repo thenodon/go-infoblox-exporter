@@ -19,17 +19,18 @@ import (
 	"crypto/subtle"
 	"flag"
 	"fmt"
+	"net/http"
+	_ "net/http/pprof"
+	"os"
+	"strconv"
+	"time"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/segmentio/ksuid"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/urfave/negroni"
-	"net/http"
-	_ "net/http/pprof"
-	"os"
-	"strconv"
-	"time"
 )
 
 var version = "undefined"
