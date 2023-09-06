@@ -32,12 +32,12 @@ var (
 	)
 	nodeService = prometheus.NewDesc(
 		fmt.Sprintf("%s_%s", prefixMember, "node_service"),
-		"Node service (1=Working, 0=Failed)",
+		"Node service (0=Failed, 1=Working, 2=Unknown)",
 		memberNodeLabels, nil,
 	)
 	service = prometheus.NewDesc(
 		fmt.Sprintf("%s_%s", prefixMember, "service"),
-		"Service (1=Working, 0=Failed)",
+		"Service (0=Failed, 1=Working, 2=Unknown)",
 		memberLabels, nil,
 	)
 )
