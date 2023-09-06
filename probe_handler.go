@@ -37,7 +37,7 @@ var probeDurationGauge = prometheus.NewGauge(prometheus.GaugeOpts{
 
 func ProbeHandler(w http.ResponseWriter, r *http.Request) {
 	target := r.URL.Query().Get("target")
-	module := r.URL.Query().Get("modules")
+	module := r.URL.Query().Get("module")
 
 	ctx, cancel := context.WithTimeout(r.Context(), time.Duration(30)*time.Second)
 	defer cancel()
