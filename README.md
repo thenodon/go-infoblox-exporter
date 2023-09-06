@@ -15,7 +15,7 @@ ip address, if not the value is `NO_HA_IP`.
 
 Example output for a member that have HA setup:
 ```shell
-curl 'localhost:9597/probe?target=infoblox.master.com&modules=member_services'
+curl 'localhost:9597/probe?target=infoblox.master.com&module=member_services'
 ```
 ```text
 # HELP infoblox_member_node_info Node info
@@ -97,7 +97,7 @@ For a specific network that the infoblox master manage the metrics show the util
 addresses. This can be valuable to alert on if the metrics is close to 1.0, 100 % utilization  
 
 ```shell
-curl 'localhost:9597/probe?target=10.199.73.128/26&modules=dhcp_utilization'
+curl 'localhost:9597/probe?target=10.199.73.128/26&moduls=dhcp_utilization'
 ```
 ```text
  
@@ -130,7 +130,7 @@ All variables that can be set in the `config.yml` can be set as environment vari
 curl -s 'localhost:9597/probe?target=host.foo.com&module=member_services' 
 ```
 
-The `type` can have the following values:
+The `module` can have the following values:
 - member_services - the target is infoblox member
 - dhcp_utilization - the target has to be network like `10.121.151.128/26`
 
