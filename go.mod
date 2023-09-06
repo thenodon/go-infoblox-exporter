@@ -1,6 +1,6 @@
 module go-infoblox-exporter
 
-go 1.21.0
+go 1.21
 
 require (
 	github.com/infobloxopen/infoblox-go-client/v2 v2.3.0
