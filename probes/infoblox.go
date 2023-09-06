@@ -1,6 +1,7 @@
 package probes
 
 import (
+	"strconv"
 	"unsafe"
 
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
@@ -8,13 +9,27 @@ import (
 	"github.com/spf13/viper"
 )
 
+type InfoBloxConfiguration struct {
+	Master              string
+	Version             string
+	Port                int64
+	Username            string
+	Password            string
+	SSLVerify           bool
+	HTTPRequestTimeout  int
+	HTTPPoolConnections int
+}
+
 func NewInfoBloxConfiguration() InfoBloxConfiguration {
 	return InfoBloxConfiguration{
-		Master:   viper.GetString("master"),
-		Version:  viper.GetString("wapi_version"),
-		Port:     viper.GetInt64("port"),
-		Username: viper.GetString("username"),
-		Password: viper.GetString("password"),
+		Master:              viper.GetString("infoblox.master"),
+		Version:             viper.GetString("infoblox.wapi_version"),
+		Port:                viper.GetInt64("infoblox.master_port"),
+		Username:            viper.GetString("infoblox.username"),
+		Password:            viper.GetString("infoblox.password"),
+		SSLVerify:           viper.GetBool("infoblox.ssl_verify"),
+		HTTPRequestTimeout:  viper.GetInt("infoblox.http_request_timeout"),
+		HTTPPoolConnections: viper.GetInt("infoblox.http_pool_connections"),
 	}
 }
 
@@ -71,34 +86,27 @@ func NewRange(netview string, cidr string, isIPv6 bool, comment string, ea ibcli
 	return &res
 }
 
-type InfoBloxConfiguration struct {
-	Master   string
-	Version  string
-	Port     int64
-	Username string
-	Password string
-}
-
 type InfoBloxApi struct {
 	Conn *ibclient.Connector
 }
 
 func NewInfobloxApi() InfoBloxApi {
-	x := NewInfoBloxConfiguration()
+	config := NewInfoBloxConfiguration()
 
 	hostConfig := ibclient.HostConfig{
-		Host:    x.Master,
-		Version: x.Version,
+		Host:    config.Master,
+		Version: config.Version,
 		//Port:    strconv.FormatInt(x.Port, 10),
 	}
 
 	authConfig := ibclient.AuthConfig{
-		Username:   x.Username,
-		Password:   x.Password,
+		Username:   config.Username,
+		Password:   config.Password,
 		ClientCert: nil,
 		ClientKey:  nil,
 	}
-	transportConfig := ibclient.NewTransportConfig("false", 20, 10)
+	transportConfig := ibclient.NewTransportConfig(strconv.FormatBool(config.SSLVerify), config.HTTPRequestTimeout,
+		config.HTTPPoolConnections)
 	requestBuilder := &ibclient.WapiRequestBuilder{}
 	requestor := &ibclient.WapiHttpRequestor{}
 	conn, err := ibclient.NewConnector(hostConfig, authConfig, transportConfig, requestBuilder, requestor)

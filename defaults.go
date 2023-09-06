@@ -43,43 +43,37 @@ func SetDefaultValues() {
 	viper.AutomaticEnv()
 
 	// infoblox-exporter
-	viper.SetDefault("port", 9597)
-	viper.BindEnv("port")
-	viper.SetDefault("logfile", "")
-	viper.BindEnv("logfile")
-	viper.SetDefault("logformat", "json")
-	viper.BindEnv("logformat")
-	viper.SetDefault("config", "config")
-	viper.BindEnv("config")
-	viper.SetDefault("output", "")
-	viper.BindEnv("output")
-
-	// Infoblox master
-	viper.SetDefault("master", "")
-	viper.BindEnv("master")
-	viper.SetDefault("wapi_version", "")
-	viper.BindEnv("wapi_version")
-	viper.SetDefault("username", "")
-	viper.BindEnv("username")
-	viper.SetDefault("password", "")
-	viper.BindEnv("password")
+	viper.SetDefault("exporter.port", 9597)
+	viper.BindEnv("exporter.port")
+	viper.SetDefault("exporter.logfile", "")
+	viper.BindEnv("exporter.logfile")
+	viper.SetDefault("exporter.logformat", "json")
+	viper.BindEnv("exporter.logformat")
+	viper.SetDefault("exporter.config", "config")
+	viper.BindEnv("exporter.config")
 
 	// Basic auth exporter
-	viper.SetDefault("basic_auth_username", "")
-	viper.BindEnv("basic_auth_username")
-	viper.SetDefault("basic_auth_password", "")
-	viper.BindEnv("basic_auth_password")
+	//viper.SetDefault("exporter.basic_auth.username)
+	viper.BindEnv("exporter.basic_auth.username")
+	//viper.SetDefault("exporter.basic_auth.password", "")
+	viper.BindEnv("exporter.basic_auth.password")
 
-	// HTTPCLient
-	viper.SetDefault("HTTPClient.timeout", 3)
-	viper.BindEnv("HTTPClient.timeout")
+	// Infoblox master
+	viper.SetDefault("infoblox.master", "")
+	viper.BindEnv("infoblox.master")
+	viper.SetDefault("infoblox.master_port", "")
+	viper.BindEnv("infoblox.master_port")
+	viper.SetDefault("infoblox.wapi_version", "")
+	viper.BindEnv("infoblox.wapi_version")
+	viper.SetDefault("infoblox.username", "")
+	viper.BindEnv("infoblox.username")
+	viper.SetDefault("infoblox.password", "")
+	viper.BindEnv("infoblox.password")
+	viper.SetDefault("infoblox.ssl_verify", false)
+	viper.BindEnv("infoblox.ssl_verify")
+	viper.SetDefault("infoblox.http_request_timeout", 20)
+	viper.BindEnv("infoblox.http_request_timeout")
+	viper.SetDefault("infoblox.http_pool_connections", 10)
+	viper.BindEnv("infoblox.http_pool_connections")
 
-	viper.SetDefault("HTTPClient.keepalive", 10)
-	viper.BindEnv("HTTPClient.keepalive")
-
-	viper.SetDefault("HTTPClient.tlshandshaketimeout", 10)
-	viper.BindEnv("HTTPClient.tlshandshaketimeout")
-
-	viper.SetDefault("HTTPClient.insecureHTTPS", true)
-	viper.BindEnv("HTTPClient.insecureHTTPS")
 }

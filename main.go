@@ -44,17 +44,15 @@ func main() {
 
 	SetDefaultValues()
 
-	flag.Int("p", viper.GetInt("port"), "The port to start on")
+	flag.Int("p", viper.GetInt("exporter.port"), "The port to start on")
 
-	logFile := flag.String("logfile", viper.GetString("logfile"), "Set log file, default stdout")
-	logFormat := flag.String("logformat", viper.GetString("logformat"), "Set log format to text or json, default json")
+	logFile := flag.String("logfile", viper.GetString("exporter.logfile"), "Set log file, default stdout")
+	logFormat := flag.String("logformat", viper.GetString("exporter.logformat"), "Set log format to text or json, default json")
 
-	configFile := flag.String("config", viper.GetString("config"), "Set configuration file, default config.yaml")
+	configFile := flag.String("config", viper.GetString("exporter.config"), "Set configuration file, default config.yaml")
 	usage := flag.Bool("u", false, "Show usage")
 	versionFlag := flag.Bool("v", false, "Show version")
 	writeConfig := flag.Bool("default", false, "Write default config")
-	//customer := flag.String("customer", viper.GetString("customer"), "The customer to use in the config")
-	//output := flag.String("output", viper.GetString("output"), "The output file, default stdout")
 
 	flag.Parse()
 
@@ -128,11 +126,12 @@ func main() {
 	http.Handle("/probe",
 		logCall(promMonitor(basicAuth(http.HandlerFunc(ProbeHandler)), responseTime, "/probe")))
 
-	log.Info(fmt.Sprintf("%s starting on port %d", ExporterName, viper.GetInt("port")))
+	log.Info(fmt.Sprintf("%s starting on port %d", ExporterName, viper.GetInt("exporter."+
+		"port")))
 	s := &http.Server{
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 10 * time.Second,
-		Addr:         ":" + strconv.Itoa(viper.GetInt("port")),
+		Addr:         ":" + strconv.Itoa(viper.GetInt("exporter.port")),
 	}
 	log.Fatal(s.ListenAndServe())
 	/*
@@ -201,7 +200,7 @@ func promMonitor(next http.Handler, ops *prometheus.HistogramVec, endpoint strin
 func basicAuth(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Check if basic auth should be used
-		if !viper.IsSet("exporter.basicAuth") {
+		if !viper.IsSet("exporter.basic_auth") {
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -212,8 +211,8 @@ func basicAuth(next http.HandlerFunc) http.HandlerFunc {
 			// usernames and passwords.
 			usernameHash := sha256.Sum256([]byte(username))
 			passwordHash := sha256.Sum256([]byte(password))
-			expectedUsernameHash := sha256.Sum256([]byte(viper.GetString("exporter.basicAuth.username")))
-			expectedPasswordHash := sha256.Sum256([]byte(viper.GetString("exporter.basicAuth.password")))
+			expectedUsernameHash := sha256.Sum256([]byte(viper.GetString("exporter.basic_auth.username")))
+			expectedPasswordHash := sha256.Sum256([]byte(viper.GetString("exporter.basic_auth.password")))
 
 			// Use the subtle.ConstantTimeCompare() function to check if
 			// the provided username and password hashes equal the

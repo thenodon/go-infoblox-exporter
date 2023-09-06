@@ -1,0 +1,17 @@
+exporter:
+  port: 9597
+  # Can be json or text
+  logformat: json
+  # Default stdout
+  #logfile: xxx.log
+  #basic_auth:
+  #  username: foo
+  #  password: bar
+
+
+# The connection to infoblox
+infoblox:
+  master: infoblox.master.com
+  wapi_version: 2.10.5
+  username: foo
+  password: bar

@@ -118,21 +118,12 @@ network exists.
 Please see the [infoblox-discovery](https://github.com/thenodon/infoblox_discovery)
 to get dynamic Prometheus discovery configuration for   
 
-# Environment variables
+# Configuration
+Default config file name is `config.yml`. Please see `example_config.yml` for example.
 
-The following variables ar mandatory to set.
+## Environment variables
+All variables that can be set in the `config.yml` can be set as environment variables prefix with `INFOBLOX_EXPORTER_`
 
-- BASIC_AUTH_USERNAME - the basic auth username to the exporter
-- BASIC_AUTH_PASSWORD - the basic auth password to the exporter 
-- INFOBLOX_MASTER - the ip/fqdn to the infoblox server
-- INFOBLOX_WAPI_VERSION - the Infoblox master api version
-- INFOBLOX_USERNAME - the Infoblox master username
-- INFOBLOX_PASSWORD  - the Infoblox master password
-
-The following are optional
-- EXPORTER_HOST - default to `0.0.0.0`
-- EXPORTER_PORT - default to `9597`
-- EXPORTER_LOG_LEVEL - default to `INFO`
 
 # Test
 ```
