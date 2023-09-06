@@ -1,7 +1,6 @@
 package probes
 
 import (
-	"fmt"
 	"unsafe"
 
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
@@ -104,7 +103,7 @@ func NewInfobloxApi() InfoBloxApi {
 	requestor := &ibclient.WapiHttpRequestor{}
 	conn, err := ibclient.NewConnector(hostConfig, authConfig, transportConfig, requestBuilder, requestor)
 	if err != nil {
-		fmt.Printf("%s", fmt.Errorf("Failed to connect", err))
+		log.Error("Failed to connect", err)
 	}
 
 	return InfoBloxApi{Conn: conn}
@@ -120,7 +119,7 @@ func (i InfoBloxApi) GetDhcpUtilization(network string) (Range, error) {
 	err := i.Conn.GetObject(net, "", qp, &res)
 
 	if err != nil {
-		log.Error(fmt.Sprintf("%s", fmt.Errorf("Failed to get network", err)))
+		log.Error("Failed to network", err)
 		return *net, err
 	}
 
@@ -137,36 +136,10 @@ func (i InfoBloxApi) GetMember(nodeName string) (Member, error) {
 	err := i.Conn.GetObject(net, "", qp, &res)
 
 	if err != nil {
-		log.Error(fmt.Sprintf("%s", fmt.Errorf("Failed to get node", err)))
+		log.Error("Failed to get node", err)
 		return *net, err
 	}
 	return res[0], nil
-}
-
-func (i InfoBloxApi) GetMemberX(nodeName string) {
-
-	var res []ibclient.Member
-	member := ibclient.Member{
-		IBBase:                   ibclient.IBBase{},
-		Ref:                      "",
-		HostName:                 nodeName,
-		ConfigAddrType:           "",
-		PLATFORM:                 "",
-		ServiceTypeConfiguration: "",
-		Nodeinfo:                 nil,
-		TimeZone:                 "",
-	}
-	net := ibclient.NewMember(member)
-
-	queryAttribute := map[string]string{"host_name": nodeName}
-	qp := ibclient.NewQueryParams(false, queryAttribute)
-	err := i.Conn.GetObject(net, "", qp, &res)
-
-	//res, err := objMgr.GetNetwork("", network, false, nil)
-	if err != nil {
-		fmt.Printf("%s", fmt.Errorf("Failed to get network", err))
-	}
-
 }
 
 func (i InfoBloxApi) Logout() {
