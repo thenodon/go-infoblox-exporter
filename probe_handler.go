@@ -49,8 +49,6 @@ func ProbeHandler(w http.ResponseWriter, r *http.Request) {
 	pc := &probes.ProbeCollector{}
 	registry.MustRegister(pc)
 
-	success := true
-
 	success, err := pc.Probe(ctx, target, module)
 
 	if err != nil {
@@ -63,6 +61,8 @@ func ProbeHandler(w http.ResponseWriter, r *http.Request) {
 
 	if success {
 		probeSuccessGauge.Set(1)
+	} else {
+		probeSuccessGauge.Set(0)
 	}
 
 	h := promhttp.HandlerFor(registry, promhttp.HandlerOpts{})
