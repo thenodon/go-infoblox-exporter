@@ -11,7 +11,7 @@ Currently, two types of metrics is supported:
 Service, member or nodes, are reported as a gauge state 1=WORKING, 0=FAILED, 2=UNKNOWN. 
 Any services in the INACTIVE state are not included. 
 For node services the label `node_ip` is added. If the node is part of a HA setup the value is an
-ip address, if not the value is `NO_HA_IP`.
+ip address, if not the value is an empty string.
 
 Example output for a member that have HA setup:
 ```shell
