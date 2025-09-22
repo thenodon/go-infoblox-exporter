@@ -15,6 +15,7 @@ package probes
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
@@ -48,7 +49,7 @@ func (p *ProbeCollector) Probe(ctx context.Context, target string, modules strin
 	case "dhcp_utilization":
 		aProbe = probeDetailedFunc{"dhcp_utilization", probeDhcpUtilization}
 	default:
-		return false, nil
+		return false, fmt.Errorf("not a supported module")
 	}
 
 	m, ok := aProbe.function(target)

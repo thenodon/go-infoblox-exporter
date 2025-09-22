@@ -39,6 +39,10 @@ func ProbeHandler(w http.ResponseWriter, r *http.Request) {
 	target := r.URL.Query().Get("target")
 	module := r.URL.Query().Get("module")
 
+	if target == "" || module == "" {
+		http.Error(w, "target and module parameters are required", http.StatusBadRequest)
+		return
+	}
 	ctx, cancel := context.WithTimeout(r.Context(), time.Duration(30)*time.Second)
 	defer cancel()
 	registry := prometheus.NewRegistry()

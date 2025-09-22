@@ -7,6 +7,10 @@ Currently, two types of metrics is supported:
 - DHCP utilization based on networks
 
 # Metrics
+Two types of metrics is supported using different modules:
+- member_services - metrics for services and nodes managed by the infoblox master
+- dhcp_utilization - metrics for DHCP utilization for a specific network managed by the infoblox master
+
 ## Members 
 Service, member or nodes, are reported as a gauge state 1=WORKING, 0=FAILED, 2=UNKNOWN. 
 Any services in the INACTIVE state are not included. 
@@ -97,7 +101,7 @@ For a specific network that the infoblox master manage the metrics show the util
 addresses. This can be valuable to alert on if the metrics is close to 1.0, 100 % utilization  
 
 ```shell
-curl 'localhost:9597/probe?target=10.199.73.128/26&moduls=dhcp_utilization'
+curl 'localhost:9597/probe?target=10.199.73.128/26&module=dhcp_utilization'
 ```
 ```text
  
