@@ -38,12 +38,12 @@ func probeDhcpUtilization(target string) ([]prometheus.Metric, bool) {
 		return m, false
 	}
 
-	m = metricsDevice(target, utilization, m)
+	m = metricsDevice(utilization, m)
 
 	return m, true
 }
 
-func metricsDevice(target string, utilization Range, m []prometheus.Metric) []prometheus.Metric {
+func metricsDevice(utilization Range, m []prometheus.Metric) []prometheus.Metric {
 
 	m = append(m, prometheus.MustNewConstMetric(dhcpUtilization, prometheus.GaugeValue, float64(utilization.Utilization)/1000.0))
 

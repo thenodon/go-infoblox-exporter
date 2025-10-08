@@ -51,12 +51,12 @@ func probeMember(target string) ([]prometheus.Metric, bool) {
 		return m, false
 	}
 
-	m = metricsMember(target, member, m)
+	m = metricsMember(member, m)
 
 	return m, true
 }
 
-func metricsMember(target string, member Member, m []prometheus.Metric) []prometheus.Metric {
+func metricsMember(member Member, m []prometheus.Metric) []prometheus.Metric {
 
 	for _, mem := range member.ServiceStatus {
 		if mem.Status != "INACTIVE" {
