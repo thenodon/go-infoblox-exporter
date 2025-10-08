@@ -9,7 +9,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
-// Copyright 2023 Anders Håål
+// Copyright 2023-2025 Anders Håål
 
 package probes
 

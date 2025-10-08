@@ -1,13 +1,31 @@
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+// You should have received a copy of the GNU General Public License
+// along with this program.  If not, see <https://www.gnu.org/licenses/>.
+//
+// Copyright 2023-2025 Anders Håål
+
 package probes
 
 import (
 	"strconv"
-	"unsafe"
 
 	ibclient "github.com/infobloxopen/infoblox-go-client/v2"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
+
+var infobloxApi InfoBloxApi
+
+func SetInfobloxApi(api InfoBloxApi) {
+	infobloxApi = api
+}
 
 type InfoBloxConfiguration struct {
 	Master              string
@@ -34,56 +52,46 @@ func NewInfoBloxConfiguration() InfoBloxConfiguration {
 }
 
 type Member struct {
-	ibclient.IBBase          `json:"-"`
+	ibclient.IBBase
 	Ref                      string                   `json:"_ref,omitempty"`
 	HostName                 string                   `json:"host_name,omitempty"`
 	ConfigAddrType           string                   `json:"config_addr_type,omitempty"`
 	PLATFORM                 string                   `json:"platform,omitempty"`
 	ServiceTypeConfiguration string                   `json:"service_type_configuration,omitempty"`
-	Nodeinfo                 []ibclient.NodeInfo      `json:"node_info,omitempty"`
+	Nodeinfo                 []ibclient.Nodeinfo      `json:"node_info,omitempty"`
 	TimeZone                 string                   `json:"time_zone,omitempty"`
-	ServiceStatus            []ibclient.ServiceStatus `json:"service_status,omitempty"`
+	ServiceStatus            []ibclient.Servicestatus `json:"service_status,omitempty"`
+}
+
+func (m *Member) ObjectType() string {
+	return "member"
 }
 
 func NewMember(nodeName string) *Member {
-	var res Member
-	res.HostName = nodeName
-	p := &ibclient.IBBase{}
-	p1 := (*string)(unsafe.Pointer(p))
-
-	*p1 = "member"
-	ptrSize := unsafe.Sizeof(string("member"))
-	*(*[]string)(unsafe.Pointer(uintptr(unsafe.Pointer(p)) + uintptr(ptrSize))) =
-		[]string{"extattrs", "host_name", "node_info", "service_status"}
-	res.IBBase = *p
-	return &res
+	return &Member{
+		HostName: nodeName,
+	}
 }
 
 type Range struct {
 	ibclient.IBBase
-	Ref string `json:"_ref,omitempty"`
-	//NetviewName string `json:"network_view,omitempty"`
+	Ref         string      `json:"_ref,omitempty"`
 	Cidr        string      `json:"network,omitempty"`
 	Ea          ibclient.EA `json:"extattrs"`
 	Comment     string      `json:"comment"`
 	Utilization int64       `json:"dhcp_utilization"`
 }
 
-func NewRange(netview string, cidr string, isIPv6 bool, comment string, ea ibclient.EA) *Range {
-	var res Range
-	//res.NetviewName = netview
-	res.Cidr = cidr
-	res.Ea = ea
-	res.Comment = comment
-	p := &ibclient.IBBase{}
-	p1 := (*string)(unsafe.Pointer(p))
+func (r *Range) ObjectType() string {
+	return "range"
+}
 
-	*p1 = "range"
-	ptrSize := unsafe.Sizeof(string("range"))
-	*(*[]string)(unsafe.Pointer(uintptr(unsafe.Pointer(p)) + uintptr(ptrSize))) =
-		[]string{"extattrs", "network", "dhcp_utilization", "comment"}
-	res.IBBase = *p
-	return &res
+func NewRange(cidr string, comment string, ea ibclient.EA) *Range {
+	return &Range{
+		Cidr:    cidr,
+		Ea:      ea,
+		Comment: comment,
+	}
 }
 
 type InfoBloxApi struct {
@@ -96,7 +104,6 @@ func NewInfobloxApi() InfoBloxApi {
 	hostConfig := ibclient.HostConfig{
 		Host:    config.Master,
 		Version: config.Version,
-		//Port:    strconv.FormatInt(x.Port, 10),
 	}
 
 	authConfig := ibclient.AuthConfig{
@@ -118,16 +125,18 @@ func NewInfobloxApi() InfoBloxApi {
 }
 
 func (i InfoBloxApi) GetDhcpUtilization(network string) (Range, error) {
-
 	var res []Range
-	net := NewRange("", network, false, "", nil)
+	net := NewRange(network, "", nil)
 
-	queryAttribute := map[string]string{"network": network}
+	queryAttribute := map[string]string{
+		"network":        network,
+		"_return_fields": "extattrs,network,dhcp_utilization,comment",
+	}
 	qp := ibclient.NewQueryParams(false, queryAttribute)
 	err := i.Conn.GetObject(net, "", qp, &res)
 
 	if err != nil {
-		log.Error("Failed to network", err)
+		log.Error("Failed to get network", err)
 		return *net, err
 	}
 
@@ -135,11 +144,13 @@ func (i InfoBloxApi) GetDhcpUtilization(network string) (Range, error) {
 }
 
 func (i InfoBloxApi) GetMember(nodeName string) (Member, error) {
-
 	var res []Member
 	net := NewMember(nodeName)
 
-	queryAttribute := map[string]string{"host_name": nodeName}
+	queryAttribute := map[string]string{
+		"host_name":      nodeName,
+		"_return_fields": "extattrs,host_name,node_info,service_status",
+	}
 	qp := ibclient.NewQueryParams(false, queryAttribute)
 	err := i.Conn.GetObject(net, "", qp, &res)
 

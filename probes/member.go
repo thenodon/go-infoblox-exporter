@@ -9,7 +9,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
-// Copyright 2023 Anders Håål
+// Copyright 2023-2025 Anders Håål
 
 package probes
 
@@ -46,9 +46,7 @@ func probeMember(target string) ([]prometheus.Metric, bool) {
 
 	var m []prometheus.Metric
 
-	api := NewInfobloxApi()
-	defer api.Logout()
-	member, err := api.GetMember(target)
+	member, err := infobloxApi.GetMember(target)
 	if err != nil {
 		return m, false
 	}
@@ -71,7 +69,7 @@ func metricsMember(target string, member Member, m []prometheus.Metric) []promet
 		dup := make(map[string]string)
 		ip := mem.LanHaPortSetting.MgmtLan
 		m = append(m, prometheus.MustNewConstMetric(nodeInfo, prometheus.GaugeValue, 1.0,
-			mem.HaStatus, mem.HwId, mem.HwType, ip, mem.HwPlatform))
+			mem.HaStatus, mem.Hwid, mem.Hwtype, ip, mem.Hwplatform))
 		for _, node := range mem.ServiceStatus {
 			if node.Status != "INACTIVE" {
 				_, ok := dup[node.Service]

@@ -9,7 +9,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
-// Copyright 2023 Anders Håål and Telenor AB
+// Copyright 2023-2025 Anders Håål
 
 package main
 
@@ -27,10 +27,13 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/segmentio/ksuid"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/urfave/negroni"
+
+	"go-infoblox-exporter/probes"
 )
 
 var version = "undefined"
@@ -112,19 +115,27 @@ func main() {
 		log.WithFields(log.Fields{"error": err}).Error("Configuration file not valid")
 		os.Exit(1)
 	}
+
+	// create a single instance of InfobloxApi to be reused for all requests
+	infobloxApi := probes.NewInfobloxApi()
+	// Pass infobloxApi to handlers or set in probes package
+	probes.SetInfobloxApi(infobloxApi)
+
 	// Create a Prometheus histogram for response time of the exporter
 	responseTime := promauto.NewHistogramVec(prometheus.HistogramOpts{
 		Name:    MetricsPrefix + "request_duration_seconds",
 		Help:    "Histogram of the time (in seconds) each request took to complete.",
 		Buckets: []float64{0.001, 0.005, 0.010, 0.020, 0.100, 0.200, 0.500, 1.000, 2.000},
 	},
-		[]string{"url", "status", "request_type"},
+		[]string{"url", "status"},
 	)
 	http.Handle("/alive",
 		logCall(promMonitor(http.HandlerFunc(alive), responseTime, "/alive")))
 
 	http.Handle("/probe",
 		logCall(promMonitor(basicAuth(http.HandlerFunc(ProbeHandler)), responseTime, "/probe")))
+
+	http.Handle("/metrics", promhttp.Handler())
 
 	log.Info(fmt.Sprintf("%s starting on port %d", ExporterName, viper.GetInt("exporter."+
 		"port")))
@@ -134,18 +145,6 @@ func main() {
 		Addr:         ":" + strconv.Itoa(viper.GetInt("exporter.port")),
 	}
 	log.Fatal(s.ListenAndServe())
-	/*
-		api := NewInfobloxApi()
-		defer api.Logout()
-		member, err := api.GetMember("vgns0022.vgregion.se")
-		fmt.Printf("%s\n", member.HostName)
-		utilization, err := api.GetDhcpUtilization("10.199.73.128/26")
-		fmt.Printf("%.2f\n", float64(utilization.Utilization)/1000.0)
-		utilization, err = api.GetDhcpUtilization("10.31.240.160/28")
-		fmt.Printf("%.2f\n", float64(utilization.Utilization)/1000.0)
-		utilization, err = api.GetDhcpUtilization("10.93.25.0/24")
-		fmt.Printf("%.2f\n", float64(utilization.Utilization)/1000.0)
-	*/
 }
 
 type loggingResponseWriter struct {
@@ -186,14 +185,11 @@ func nextRequestID() ksuid.KSUID {
 func promMonitor(next http.Handler, ops *prometheus.HistogramVec, endpoint string) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
-		requestType := "customer"
-		if r.URL.Query().Get("device_id") != "" || r.URL.Query().Get("device_name") != "" {
-			requestType = "single"
-		}
+
 		lrw := negroni.NewResponseWriter(w)
 		next.ServeHTTP(lrw, r)
 		response := time.Since(start).Seconds()
-		ops.With(prometheus.Labels{"url": endpoint, "status": strconv.Itoa(lrw.Status()), "request_type": requestType}).Observe(response)
+		ops.With(prometheus.Labels{"url": endpoint, "status": strconv.Itoa(lrw.Status())}).Observe(response)
 	})
 }
 
